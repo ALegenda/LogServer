@@ -1,11 +1,17 @@
-const Gamedig = require('gamedig');
-Gamedig.query({
-    type: 'csgo',
-    host: '195.133.145.138',
-    port: '3000'
-}).then((state) => {
-    console.log(state);
-}).catch((error) => {
-    console.log(error);
-    console.log("Server is offline");
+var dgram = require('dgram'),
+    server = dgram.createSocket('udp4');
+
+server.on('message', function (message, rinfo) {
+var msg = message.toString('ascii').slice(5,-1);    
+console.log(msg);
+    });
+
+
+server.on('listening', function () {
+    var address = server.address();
+    console.log('UDP Server listening ' + address.address + ':' + address.port);
+});
+
+server.bind(3000, function() {
+  server.addMembership('195.133.145.138');
 });
