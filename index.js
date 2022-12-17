@@ -17,5 +17,6 @@ receiver.on('error', ({server, error}) => {
 });
 
 receiver.on('log', ({server, message}) => {
+    console.log("kek")
     console.log(receiver.stringifyServerId(server), message);
 });
