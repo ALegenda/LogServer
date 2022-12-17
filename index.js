@@ -2,7 +2,7 @@ import { SrcdsLogReceiver } from '@srcds/log-receiver';
 
 const receiver = new SrcdsLogReceiver({
 	hostname: '0.0.0.0',
-	port: 9871,
+	port: 9872,
 
 	onlyRegisteredServers: false
 });
