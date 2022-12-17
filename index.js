@@ -1,17 +1,19 @@
-var dgram = require('dgram'),
-    server = dgram.createSocket('udp4');
+var dgram = require('dgram')
 
-server.on('message', function (message, rinfo) {
-var msg = message.toString('ascii').slice(5,-1);    
-console.log(msg);
-    });
+const server = dgram.createSocket('udp4');
 
-
-server.on('listening', function () {
-    var address = server.address();
-    console.log('UDP Server listening ' + address.address + ':' + address.port);
+server.on('error', (err) => {
+    console.error(`server error:\n${err.stack}`);
+    server.close();
 });
 
-server.bind(3000, function() {
-  server.addMembership('195.133.145.138');
+server.on('message', (msg, rinfo) => {
+    console.log(`server got: ${msg} from ${rinfo.address}:${rinfo.port}`);
 });
+
+server.on('listening', () => {
+    const address = server.address();
+    console.log(`server listening ${address.address}:${address.port}`);
+  });
+
+  server.bind(3000);
