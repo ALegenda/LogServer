@@ -1,7 +1,5 @@
-import { query } from 'gamedig';
-
-
-query({
+const Gamedig = require('gamedig');
+Gamedig.query({
     type: 'csgo',
     host: 'oberyn.dathost.net',
     port: '27502'
