@@ -1,19 +1,21 @@
-var dgram = require('dgram')
+const CSGOLogReceiver = require('csgo-log-receiver');
 
-const server = dgram.createSocket('udp4');
-
-server.on('error', (err) => {
-    console.error(`server error:\n${err.stack}`);
-    server.close();
+const receiver = new CSGOLogReceiver({
+    host: '0.0.0.0', 
+    port: 9871
 });
 
-server.on('message', (msg, rinfo) => {
-    console.log(`server got: ${msg} from ${rinfo.address}:${rinfo.port}`);
+// Registration of the server from which you want to receive logs
+receiver.registerSource({
+    address: 'oberyn.dathost.net',
+    port: 27502,
+    password: 'raupe'
 });
 
-server.on('listening', () => {
-    const address = server.address();
-    console.log(`server listening ${address.address}:${address.port}`);
-  });
+receiver.on('error', ({server, error}) => {
+    console.error('Error on server', receiver.stringifyServerId(server), '#' + error);
+});
 
-  server.bind(3000);
+receiver.on('log', ({server, message}) => {
+    console.log(receiver.stringifyServerId(server), message);
+});
