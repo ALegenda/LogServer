@@ -1,8 +1,8 @@
 const Gamedig = require('gamedig');
 Gamedig.query({
     type: 'csgo',
-    host: 'oberyn.dathost.net',
-    port: '27502'
+    host: 'http://195.133.145.138/',
+    port: '3000'
 }).then((state) => {
     console.log(state);
 }).catch((error) => {
