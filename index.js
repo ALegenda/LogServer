@@ -1,22 +1,30 @@
-const CSGOLogReceiver = require('csgo-log-receiver');
+import { SrcdsLogReceiver } from '@srcds/log-receiver';
 
-const receiver = new CSGOLogReceiver({
-    host: '0.0.0.0', 
-    port: 9871
+const receiver = new SrcdsLogReceiver({
+	hostname: '0.0.0.0',
+	port: 9871,
+
+	onlyRegisteredServers: false
 });
 
-// Registration of the server from which you want to receive logs
-receiver.registerSource({
-    address: 'oberyn.dathost.net',
+receiver.addServers({
+    hostname: 'oberyn.dathost.net',
     port: 27502,
     password: 'raupe'
 });
 
-receiver.on('error', ({server, error}) => {
-    console.error('Error on server', receiver.stringifyServerId(server), '#' + error);
+receiver.on('log', (log) => {
+	console.log('Log', log);
 });
 
-receiver.on('log', ({server, message}) => {
-    console.log("kek")
-    console.log(receiver.stringifyServerId(server), message);
+receiver.on('error', (error) => {
+	console.log('error', error);
 });
+
+async function run() {
+	await receiver.listen();
+
+	console.log('Server running');
+}
+
+run().catch(console.log);

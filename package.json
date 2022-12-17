@@ -1,7 +1,9 @@
 {
   "dependencies": {
+    "@srcds/log-receiver": "^0.1.0",
     "csgo-log-receiver": "^1.0.6",
     "dgram": "^1.0.1",
     "gamedig": "^4.0.5"
-  }
+  },
+  "type": "module"
 }
