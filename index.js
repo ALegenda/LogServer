@@ -1,4 +1,5 @@
 import { SrcdsLogReceiver } from '@srcds/log-receiver';
+import { parse } from '@srcds/log-parser';
 
 const receiver = new SrcdsLogReceiver({
 	hostname: '0.0.0.0',
@@ -14,7 +15,8 @@ receiver.addServers({
 });
 
 receiver.on('log', (log) => {
-	console.log('Log', log);
+    const parsed = parse(log);
+    console.log('Log', parsed.payload);
 });
 
 receiver.on('error', (error) => {

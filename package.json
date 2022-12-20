@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@srcds/log-parser": "^0.1.0",
     "@srcds/log-receiver": "^0.1.0",
     "csgo-log-receiver": "^1.0.6",
     "dgram": "^1.0.1",
