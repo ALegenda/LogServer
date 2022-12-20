@@ -15,8 +15,9 @@ receiver.addServers({
 });
 
 receiver.on('log', (log) => {
-    //const parsed = parse(log);
+    const parsed = parse(log.payload);
     console.log('Log', log);
+    console.log('Parsed', parsed);
 });
 
 receiver.on('error', (error) => {
