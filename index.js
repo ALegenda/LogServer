@@ -1,6 +1,9 @@
 import { SrcdsLogReceiver } from '@srcds/log-receiver';
 import { parse } from '@srcds/log-parser';
 
+const buffer = {}
+const matchStart = false
+
 const receiver = new SrcdsLogReceiver({
 	hostname: '0.0.0.0',
 	port: 9872,
@@ -18,6 +21,9 @@ receiver.on('log', (log) => {
     const parsed = parse(log.payload);
     console.log('Log', log);
     console.log('Parsed', parsed);
+    if (parsed.type === "server_log"){
+        
+    }
 });
 
 receiver.on('error', (error) => {
