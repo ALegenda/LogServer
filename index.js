@@ -9,13 +9,13 @@ let map_name = ""
 let first_half = true
 
 let teams = {
-    team1 : {
-        name : "",
-        score : 0
+    team1: {
+        name: "",
+        score: 0
     },
-    team2 : {
-        name : "",
-        score : 0
+    team2: {
+        name: "",
+        score: 0
     }
 }
 
@@ -83,50 +83,115 @@ function roundEnd() {
     let results = Object.keys(stats).map((key) => stats[key]);
     let results_for_site = results.map(player => {
         return {
-            "steamId" : player.steamId,
-            "nickName" : player.nickName,
-            "kills" : player.kills,
-            "assists" : player.assists,
-            "deaths" : player.deaths,
+            "steamId": player.steamId,
+            "nickName": player.nickName,
+            "kills": player.kills,
+            "assists": player.assists,
+            "deaths": player.deaths,
         }
     })
     //write results
     fetch('https://rcl-testing.onrender.com/test', {
-    method: 'POST',
-    headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-        "playerStats" : results_for_site,
-        "mapName" : map_name,
-        "team1": {
-            "name": teams.team1.name,
-            "score": teams.team1.score
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
         },
-        "team2": {
-            "name": teams.team2.name,
-            "score": teams.team2.score
-        }
+        body: JSON.stringify({
+            "playerStats": results_for_site,
+            "mapName": map_name,
+            "team1": {
+                "name": teams.team1.name,
+                "score": teams.team1.score
+            },
+            "team2": {
+                "name": teams.team2.name,
+                "score": teams.team2.score
+            }
+        })
     })
-})
-.then(response => response.json())
-.then(response => console.log(JSON.stringify(response)))
-    //console.log(stats)
-    //console.log(teams)
+        .then(response => response.json())
+        .then(response => console.log("round data send"))
+
+    fetch('https://api.itsport.pro/round', {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            "playerStats": results_for_site,
+            "mapName": map_name,
+            "team1": {
+                "name": teams.team1.name,
+                "score": teams.team1.score
+            },
+            "team2": {
+                "name": teams.team2.name,
+                "score": teams.team2.score
+            }
+        })
+    })
+        .then(response => response.json())
+        .then(response => console.log("round data send"))
+
+
 }
 
-function mapEnd(){
+function mapEnd() {
     let results = Object.keys(stats).map((key) => stats[key]);
     let results_for_site = results.map(player => {
         return {
-            "steamId" : player.steamId,
-            "nickName" : player.nickName,
-            "kills" : player.kills,
-            "assists" : player.assists,
-            "deaths" : player.deaths,
+            "steamId": player.steamId,
+            "nickName": player.nickName,
+            "kills": player.kills,
+            "assists": player.assists,
+            "deaths": player.deaths,
         }
     })
+    fetch('https://rcl-testing.onrender.com/test', {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            "playerStats": results_for_site,
+            "mapName": map_name,
+            "team1": {
+                "name": teams.team1.name,
+                "score": teams.team1.score
+            },
+            "team2": {
+                "name": teams.team2.name,
+                "score": teams.team2.score
+            }
+        })
+    })
+        .then(response => response.json())
+        .then(response => console.log("round data send"))
+
+    fetch('https://api.itsport.pro/games', {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            "playerStats": results_for_site,
+            "mapName": map_name,
+            "team1": {
+                "name": teams.team1.name,
+                "score": teams.team1.score
+            },
+            "team2": {
+                "name": teams.team2.name,
+                "score": teams.team2.score
+            }
+        })
+    })
+        .then(response => response.json())
+        .then(response => console.log("map data send"))
     // console.log({
     //     "playerStats" : results_for_site,
     //     "mapName" : map_name,
@@ -181,24 +246,24 @@ receiver.on('log', (log) => {
 
     if (parsed.type === 'team_name') {
         console.log(`Recive team name ${parsed.payload.name}`);
-        if (parsed.payload.team.name === 'COUNTER_TERRORISTS'){
+        if (parsed.payload.team.name === 'COUNTER_TERRORISTS') {
             teams.team1.name = parsed.payload.name
-        } else{ 
+        } else {
             teams.team2.name = parsed.payload.name
         }
-        
+
     }
 
     if (parsed.type === 'team_triggered') {
         console.log(`Round end with score ${parsed.payload.counterTerroristScore} - ${parsed.payload.terroristScore}`);
-        if (parsed.payload.counterTerroristScore + parsed.payload.terroristScore === 15){
+        if (parsed.payload.counterTerroristScore + parsed.payload.terroristScore === 15) {
             first_half = false
         }
-        if(first_half){
+        if (first_half) {
             teams.team1.score = parsed.payload.counterTerroristScore
             teams.team2.score = parsed.payload.terroristScore
         }
-        else{
+        else {
             teams.team2.score = parsed.payload.counterTerroristScore
             teams.team1.score = parsed.payload.terroristScore
         }
@@ -206,17 +271,17 @@ receiver.on('log', (log) => {
 
     if (parsed.type === 'entity_triggered' && parsed.payload.kind === 'round_end') {
         roundEnd()
-        if (teams.team1.score === 16 && teams.team2.score < 15){
+        if (teams.team1.score === 16 && teams.team2.score < 15) {
             mapEnd()
         }
-        if (teams.team2.score === 16 && teams.team1.score < 15){
+        if (teams.team2.score === 16 && teams.team1.score < 15) {
             mapEnd()
         }
-        if (teams.team1.score > 16 && teams.team1.score-3 > teams.team2.score){
+        if (teams.team1.score > 16 && teams.team1.score - 3 > teams.team2.score) {
             mapEnd()
         }
 
-        if (teams.team2.score > 16 && teams.team2.score-3 > teams.team1.score){
+        if (teams.team2.score > 16 && teams.team2.score - 3 > teams.team1.score) {
             mapEnd()
         }
     }
