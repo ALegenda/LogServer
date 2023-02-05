@@ -78,9 +78,41 @@ function suicideKill(player) {
 }
 
 function roundEnd() {
+
+    let results = Object.keys(stats).map((key) => stats[key]);
+    let results_for_site = results.map(player => {
+        return {
+            "steamId" : player.steamId,
+            "nickName" : player.nickName,
+            "kills" : player.kills,
+            "assists" : player.assists,
+            "deaths" : player.deaths,
+        }
+    })
     //write results
-    console.log(stats)
-    console.log(teams)
+    fetch('https://rcl-testing.onrender.com/test', {
+    method: 'POST',
+    headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+        "playerStats" : results_for_site,
+        "mapName" : map_name,
+        "team1": {
+            "name": teams.team1.name,
+            "score": teams.team1.score
+        },
+        "team2": {
+            "name": teams.team2.name,
+            "score": teams.team2.score
+        }
+    })
+})
+.then(response => response.json())
+.then(response => console.log(JSON.stringify(response)))
+    //console.log(stats)
+    //console.log(teams)
 }
 
 function mapEnd(){
