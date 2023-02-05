@@ -61,6 +61,22 @@ function assistKill(assistant) {
     }
 }
 
+function suicideKill(player) {
+    if (stats[player.steamId]) {
+        stats[assistant.steamId].deaths += 1;
+        stats[assistant.steamId].kills -= 1;
+    }
+    else {
+        stats[assistant.steamId] = {
+            "steamId": assistant.steamId,
+            "nickName": assistant.name,
+            "kills": -1,
+            "assists": 0,
+            "deaths": 1,
+        }
+    }
+}
+
 function roundEnd() {
     //write results
     console.log(stats)
@@ -72,7 +88,7 @@ function mapEnd(){
     let results_for_site = results.map(player => {
         return {
             "steamId" : player.steamId,
-            "nickName" : player.playerName,
+            "nickName" : player.nickName,
             "kills" : player.kills,
             "assists" : player.assists,
             "deaths" : player.deaths,
@@ -82,7 +98,7 @@ function mapEnd(){
         "playerStats" : results_for_site,
         "mapName" : map_name,
         "status" : "finished",
-        "finishedAt" : Date.now(),
+        "finishedAt" : new Date(),
         "team1Score": teams.team1.score,
         "team2Score": teams.team2.score
     })
@@ -103,7 +119,7 @@ receiver.addServers({
 
 receiver.on('log', (log) => {
     const parsed = parse(log.payload);
-    console.log('Log', log);
+    //console.log('Log', log);
     // console.log('Parsed', parsed);
 
     if (!parsed) return
@@ -117,6 +133,10 @@ receiver.on('log', (log) => {
 
     if (parsed.type === 'killed') {
         playerKill(parsed.payload.attacker, parsed.payload.victim)
+    }
+
+    if (parsed.type === 'suicide') {
+        suicideKill(parsed.payload.player)
     }
 
     if (parsed.type === 'assist') {
@@ -152,6 +172,13 @@ receiver.on('log', (log) => {
             mapEnd()
         }
         if (teams.team2.score === 16 && teams.team1.score < 15){
+            mapEnd()
+        }
+        if (teams.team1.score > 16 && teams.team1.score-3 > teams.team2.score){
+            mapEnd()
+        }
+
+        if (teams.team2.score > 16 && teams.team2.score-3 > teams.team1.score){
             mapEnd()
         }
     }
