@@ -67,6 +67,28 @@ function roundEnd() {
     console.log(teams)
 }
 
+function mapEnd(){
+    let results = Object.keys(stats).map((key) => stats[key]);
+    let results_for_site = results.map(player => {
+        return {
+            "steamId" : player.steamId,
+            "nickName" : player.playerName,
+            "kills" : player.kills,
+            "assists" : player.assists,
+            "deaths" : player.deaths,
+            //"adr" : player.adr
+        }
+    })
+    console.log({
+        "playerStats" : results_for_site,
+        "mapName" : map_name,
+        "status" : "finished",
+        "finishedAt" : Date.now(),
+        "team1Score": teams.team1.score,
+        "team2Score": teams.team2.score
+    })
+}
+
 const receiver = new SrcdsLogReceiver({
     hostname: '0.0.0.0',
     port: 9872,
@@ -102,6 +124,15 @@ receiver.on('log', (log) => {
         assistKill(parsed.payload.assistant)
     }
 
+    if (parsed.type === 'team_name') {
+        if (parsed.payload.team.name === 'COUNTER_TERRORISTS'){
+            teams.team1.name = parsed.payload.name
+        } else{ 
+            teams.team2.name = parsed.payload.name
+        }
+        
+    }
+
     if (parsed.type === 'team_triggered') {
         if (parsed.payload.counterTerroristScore + parsed.payload.terroristScore === 15){
             first_half = false
@@ -118,6 +149,12 @@ receiver.on('log', (log) => {
 
     if (parsed.type === 'entity_triggered' && parsed.payload.kind === 'round_end') {
         roundEnd()
+        if (teams.team1.score === 16 && teams.team2.score < 15){
+            
+        }
+        if (teams.team2.score === 16 && teams.team1.score < 15){
+            
+        }
     }
 });
 
