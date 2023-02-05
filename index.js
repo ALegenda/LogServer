@@ -1,10 +1,22 @@
 import { SrcdsLogReceiver } from '@srcds/log-receiver';
 import { parse } from '@srcds/log-parser';
 
-const stats = {}
-const matchStart = false
+let stats = {}
 
-const map_name = ""
+let map_name = ""
+
+let first_half = true
+
+let teams = {
+    team1 : {
+        name : "",
+        score : 0
+    },
+    team2 : {
+        name : "",
+        score : 0
+    }
+}
 
 function playerKill(attacker, victim) {
     if (stats[attacker.steamId]) {
@@ -52,6 +64,7 @@ function assistKill(assistant) {
 function roundEnd() {
     //write results
     console.log(stats)
+    console.log(teams)
 }
 
 const receiver = new SrcdsLogReceiver({
@@ -88,6 +101,16 @@ receiver.on('log', (log) => {
         assistKill(parsed.payload.assistant)
     }
 
+    if (parsed.type === 'team_triggered') {
+        if(first_half){
+            teams.team1.score = parsed.payload.counterTerroristScore
+            teams.team2.score = parsed.payload.terroristScore
+        }
+        else{
+            teams.team2.score = parsed.payload.counterTerroristScore
+            teams.team1.score = parsed.payload.terroristScore
+        }
+    }
 
     if (parsed.type === 'entity_triggered' && parsed.payload.kind === 'round_end') {
         roundEnd()
