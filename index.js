@@ -126,14 +126,14 @@ function mapEnd(){
             "deaths" : player.deaths,
         }
     })
-    console.log({
-        "playerStats" : results_for_site,
-        "mapName" : map_name,
-        "status" : "finished",
-        "finishedAt" : new Date(),
-        "team1Score": teams.team1.score,
-        "team2Score": teams.team2.score
-    })
+    // console.log({
+    //     "playerStats" : results_for_site,
+    //     "mapName" : map_name,
+    //     "status" : "finished",
+    //     "finishedAt" : new Date(),
+    //     "team1Score": teams.team1.score,
+    //     "team2Score": teams.team2.score
+    // })
 }
 
 const receiver = new SrcdsLogReceiver({
