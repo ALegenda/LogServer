@@ -123,27 +123,31 @@ receiver.on('log', (log) => {
     // console.log('Parsed', parsed);
 
     if (!parsed) return
-    console.log('Parsed', parsed);
 
     if (parsed.type === 'entity_triggered' && parsed.payload.kind === 'match_start') {
         stats = {}
         first_half = true
         map_name = parsed.payload.value
+        console.log('Parsed', parsed);
     }
 
     if (parsed.type === 'killed') {
+        console.log('Parsed', parsed);
         playerKill(parsed.payload.attacker, parsed.payload.victim)
     }
 
     if (parsed.type === 'suicide') {
+        console.log('Parsed', parsed);
         suicideKill(parsed.payload.player)
     }
 
     if (parsed.type === 'assist') {
+        console.log('Parsed', parsed);
         assistKill(parsed.payload.assistant)
     }
 
     if (parsed.type === 'team_name') {
+        console.log('Parsed', parsed);
         if (parsed.payload.team.name === 'COUNTER_TERRORISTS'){
             teams.team1.name = parsed.payload.name
         } else{ 
@@ -153,6 +157,7 @@ receiver.on('log', (log) => {
     }
 
     if (parsed.type === 'team_triggered') {
+        console.log('Parsed', parsed);
         if (parsed.payload.counterTerroristScore + parsed.payload.terroristScore === 15){
             first_half = false
         }
@@ -167,6 +172,7 @@ receiver.on('log', (log) => {
     }
 
     if (parsed.type === 'entity_triggered' && parsed.payload.kind === 'round_end') {
+        console.log('Parsed', parsed);
         roundEnd()
         if (teams.team1.score === 16 && teams.team2.score < 15){
             mapEnd()
