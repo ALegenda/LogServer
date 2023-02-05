@@ -24,8 +24,8 @@ function playerKill(attacker, victim) {
     }
     else {
         stats[victim.steamId] = {
-            "steamId" : attacker.steamId,
-            "nickName" : attacker.name,
+            "steamId" : victim.steamId,
+            "nickName" : victim.name,
             "kills" : 0,
             "assists" : 0,
             "deaths" : 1,
