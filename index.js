@@ -4,7 +4,12 @@ import { parse } from '@srcds/log-parser';
 const stats = {}
 const matchStart = false
 
+const map_name = ""
+
 function playerKill(attacker, victim) {
+    console.log(stats)
+    console.log(attacker)
+    console.log(victim)
     stats[attacker.steamId].kills += 1;
     stats[victim.steamId].deaths += 1;
 }
@@ -36,9 +41,12 @@ receiver.on('log', (log) => {
     // console.log('Log', log);
     // console.log('Parsed', parsed);
 
+    if(!parsed) return
+
     if (parsed.type === 'entity_triggered' && parsed.payload.kind === 'match_start' ){
         console.log('Parsed', parsed);
         stats = {}
+        map_name = parsed.payload.value
     }
 
     if (parsed.type === 'killed'){
