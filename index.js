@@ -12,11 +12,11 @@ function playerKill(attacker, victim) {
     }
     else {
         stats[attacker.steamId] = {
-                "steamId" : attacker.steamId,
-                "nickName" : attacker.name,
-                "kills" : 1,
-                "assists" : 0,
-                "deaths" : 0,
+            "steamId": attacker.steamId,
+            "nickName": attacker.name,
+            "kills": 1,
+            "assists": 0,
+            "deaths": 0,
         }
     }
     if (stats[victim.steamId]) {
@@ -24,18 +24,29 @@ function playerKill(attacker, victim) {
     }
     else {
         stats[victim.steamId] = {
-            "steamId" : victim.steamId,
-            "nickName" : victim.name,
-            "kills" : 0,
-            "assists" : 0,
-            "deaths" : 1,
-    }
+            "steamId": victim.steamId,
+            "nickName": victim.name,
+            "kills": 0,
+            "assists": 0,
+            "deaths": 1,
+        }
     }
 
 }
 
 function assistKill(assistant) {
-    stats[assistant.steamId].assists += 1;
+    if (stats[assistant.steamId]) {
+        stats[assistant.steamId].assists += 1;
+    }
+    else {
+        stats[assistant.steamId] = {
+            "steamId": assistant.steamId,
+            "nickName": assistant.name,
+            "kills": 0,
+            "assists": 1,
+            "deaths": 0,
+        }
+    }
 }
 
 function roundEnd() {
@@ -58,30 +69,27 @@ receiver.addServers({
 
 receiver.on('log', (log) => {
     const parsed = parse(log.payload);
-    // console.log('Log', log);
+    console.log('Log', log);
     // console.log('Parsed', parsed);
 
     if (!parsed) return
+    console.log('Parsed', parsed);
 
     if (parsed.type === 'entity_triggered' && parsed.payload.kind === 'match_start') {
-        console.log('Parsed', parsed);
         stats = {}
         map_name = parsed.payload.value
     }
 
     if (parsed.type === 'killed') {
-        console.log('Parsed', parsed);
         playerKill(parsed.payload.attacker, parsed.payload.victim)
     }
 
     if (parsed.type === 'assist') {
-        console.log('Parsed', parsed);
         assistKill(parsed.payload.assistant)
     }
 
 
     if (parsed.type === 'entity_triggered' && parsed.payload.kind === 'round_end') {
-        console.log('Parsed', parsed);
         roundEnd()
     }
 });
