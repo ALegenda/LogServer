@@ -14,13 +14,25 @@ function playerKill(attacker, victim) {
         stats[attacker.steamId].kills += 1;
     }
     else {
-        stats[attacker.steamId].kills = 1
+        stats[attacker.steamId] = {
+                "steamId" : attacker.steamId,
+                "nickName" : attacker.name,
+                "kills" : 1,
+                "assists" : 0,
+                "deaths" : 0,
+        }
     }
     if (stats[victim.steamId]) {
         stats[victim.steamId].deaths += 1;
     }
     else {
-        stats[victim.steamId].deaths = 1
+        stats[attacker.steamId] = {
+            "steamId" : attacker.steamId,
+            "nickName" : attacker.name,
+            "kills" : 0,
+            "assists" : 0,
+            "deaths" : 1,
+    }
     }
 
 }
