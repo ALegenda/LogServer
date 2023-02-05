@@ -149,10 +149,10 @@ receiver.on('log', (log) => {
     if (parsed.type === 'entity_triggered' && parsed.payload.kind === 'round_end') {
         roundEnd()
         if (teams.team1.score === 16 && teams.team2.score < 15){
-            
+            mapEnd()
         }
         if (teams.team2.score === 16 && teams.team1.score < 15){
-            
+            mapEnd()
         }
     }
 });
