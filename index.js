@@ -76,7 +76,6 @@ function mapEnd(){
             "kills" : player.kills,
             "assists" : player.assists,
             "deaths" : player.deaths,
-            //"adr" : player.adr
         }
     })
     console.log({
