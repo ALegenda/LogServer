@@ -90,6 +90,7 @@ receiver.on('log', (log) => {
 
     if (parsed.type === 'entity_triggered' && parsed.payload.kind === 'match_start') {
         stats = {}
+        first_half = true
         map_name = parsed.payload.value
     }
 
@@ -102,6 +103,9 @@ receiver.on('log', (log) => {
     }
 
     if (parsed.type === 'team_triggered') {
+        if (parsed.payload.counterTerroristScore + parsed.payload.terroristScore === 15){
+            first_half = false
+        }
         if(first_half){
             teams.team1.score = parsed.payload.counterTerroristScore
             teams.team2.score = parsed.payload.terroristScore
