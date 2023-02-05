@@ -1,5 +1,6 @@
 import { SrcdsLogReceiver } from '@srcds/log-receiver';
 import { parse } from '@srcds/log-parser';
+import fetch from "node-fetch";
 
 let stats = {}
 
@@ -63,8 +64,8 @@ function assistKill(assistant) {
 
 function suicideKill(player) {
     if (stats[player.steamId]) {
-        stats[assistant.steamId].deaths += 1;
-        stats[assistant.steamId].kills -= 1;
+        stats[player.steamId].deaths += 1;
+        stats[player.steamId].kills -= 1;
     }
     else {
         stats[assistant.steamId] = {
