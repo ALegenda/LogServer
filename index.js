@@ -68,9 +68,9 @@ function suicideKill(player) {
         stats[player.steamId].kills -= 1;
     }
     else {
-        stats[assistant.steamId] = {
-            "steamId": assistant.steamId,
-            "nickName": assistant.name,
+        stats[player.steamId] = {
+            "steamId": player.steamId,
+            "nickName": player.name,
             "kills": -1,
             "assists": 0,
             "deaths": 1,
