@@ -10,8 +10,19 @@ function playerKill(attacker, victim) {
     console.log(stats)
     console.log(attacker)
     console.log(victim)
-    stats[attacker.steamId].kills += 1;
-    stats[victim.steamId].deaths += 1;
+    if (stats[attacker.steamId]) {
+        stats[attacker.steamId].kills += 1;
+    }
+    else {
+        stats[attacker.steamId].kills = 1
+    }
+    if (stats[victim.steamId]) {
+        stats[victim.steamId].deaths += 1;
+    }
+    else {
+        stats[victim.steamId].deaths = 1
+    }
+
 }
 
 function assistKill(assistant) {
@@ -24,10 +35,10 @@ function roundEnd() {
 }
 
 const receiver = new SrcdsLogReceiver({
-	hostname: '0.0.0.0',
-	port: 9872,
+    hostname: '0.0.0.0',
+    port: 9872,
 
-	onlyRegisteredServers: false
+    onlyRegisteredServers: false
 });
 
 receiver.addServers({
@@ -41,39 +52,39 @@ receiver.on('log', (log) => {
     // console.log('Log', log);
     // console.log('Parsed', parsed);
 
-    if(!parsed) return
+    if (!parsed) return
 
-    if (parsed.type === 'entity_triggered' && parsed.payload.kind === 'match_start' ){
+    if (parsed.type === 'entity_triggered' && parsed.payload.kind === 'match_start') {
         console.log('Parsed', parsed);
         stats = {}
         map_name = parsed.payload.value
     }
 
-    if (parsed.type === 'killed'){
+    if (parsed.type === 'killed') {
         console.log('Parsed', parsed);
         playerKill(parsed.payload.attacker, parsed.payload.victim)
     }
 
-    if (parsed.type === 'assist'){
+    if (parsed.type === 'assist') {
         console.log('Parsed', parsed);
         assistKill(parsed.payload.assistant)
     }
 
 
-    if (parsed.type === 'entity_triggered' && parsed.payload.kind === 'round_end' ){
+    if (parsed.type === 'entity_triggered' && parsed.payload.kind === 'round_end') {
         console.log('Parsed', parsed);
         roundEnd()
     }
 });
 
 receiver.on('error', (error) => {
-	console.log('error', error);
+    console.log('error', error);
 });
 
 async function run() {
-	await receiver.listen();
+    await receiver.listen();
 
-	console.log('Server running');
+    console.log('Server running');
 }
 
 run().catch(console.log);
