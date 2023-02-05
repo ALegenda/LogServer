@@ -7,9 +7,6 @@ const matchStart = false
 const map_name = ""
 
 function playerKill(attacker, victim) {
-    console.log(stats)
-    console.log(attacker)
-    console.log(victim)
     if (stats[attacker.steamId]) {
         stats[attacker.steamId].kills += 1;
     }
@@ -26,7 +23,7 @@ function playerKill(attacker, victim) {
         stats[victim.steamId].deaths += 1;
     }
     else {
-        stats[attacker.steamId] = {
+        stats[victim.steamId] = {
             "steamId" : attacker.steamId,
             "nickName" : attacker.name,
             "kills" : 0,
