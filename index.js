@@ -113,6 +113,7 @@ function roundEnd() {
         .then(response => response.json())
         .then(response => console.log("round data send"))
 
+    //delay 180 sec
     fetch('https://api.itsport.pro/round', {
         method: 'POST',
         headers: {
@@ -256,9 +257,6 @@ receiver.on('log', (log) => {
 
     if (parsed.type === 'team_triggered') {
         console.log(`Round end with score ${parsed.payload.counterTerroristScore} - ${parsed.payload.terroristScore}`);
-        if (parsed.payload.counterTerroristScore + parsed.payload.terroristScore === 15) {
-            first_half = false
-        }
         if (first_half) {
             teams.team1.score = parsed.payload.counterTerroristScore
             teams.team2.score = parsed.payload.terroristScore
@@ -266,6 +264,13 @@ receiver.on('log', (log) => {
         else {
             teams.team2.score = parsed.payload.counterTerroristScore
             teams.team1.score = parsed.payload.terroristScore
+        }
+        if (parsed.payload.counterTerroristScore + parsed.payload.terroristScore === 15) {
+            first_half = false
+        }
+        if(parsed.payload.counterTerroristScore + parsed.payload.terroristScore >= 30) {
+            if((parsed.payload.counterTerroristScore + parsed.payload.terroristScore) % 3 === 0)
+            first_half = !first_half
         }
     }
 
