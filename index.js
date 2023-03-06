@@ -172,35 +172,36 @@ function mapEnd() {
         .then(response => response.json())
         .then(response => console.log("round data send"))
 
-    fetch('https://api.itsport.pro/games', {
-        method: 'POST',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            "playerStats": results_for_site,
-            "mapName": map_name,
-            "team1": {
-                "name": teams.team1.name,
-                "score": teams.team1.score
-            },
-            "team2": {
-                "name": teams.team2.name,
-                "score": teams.team2.score
-            }
+
+    let delay = (time) => {
+        return new Promise(resolve => {
+            setTimeout(resolve, time)
         })
+    }
+
+    delay(5000).then(() => {
+        fetch('https://api.itsport.pro/games', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                "playerStats": results_for_site,
+                "mapName": map_name,
+                "team1": {
+                    "name": teams.team1.name,
+                    "score": teams.team1.score
+                },
+                "team2": {
+                    "name": teams.team2.name,
+                    "score": teams.team2.score
+                }
+            })
+        })
+            .then(response => response.json())
+            .then(response => console.log("map data send"))
     })
-        .then(response => response.json())
-        .then(response => console.log("map data send"))
-    // console.log({
-    //     "playerStats" : results_for_site,
-    //     "mapName" : map_name,
-    //     "status" : "finished",
-    //     "finishedAt" : new Date(),
-    //     "team1Score": teams.team1.score,
-    //     "team2Score": teams.team2.score
-    // })
 }
 
 const receiver = new SrcdsLogReceiver({
@@ -268,9 +269,9 @@ receiver.on('log', (log) => {
         if (parsed.payload.counterTerroristScore + parsed.payload.terroristScore === 15) {
             first_half = false
         }
-        if(parsed.payload.counterTerroristScore + parsed.payload.terroristScore >= 30) {
-            if((parsed.payload.counterTerroristScore + parsed.payload.terroristScore) % 3 === 0)
-            first_half = !first_half
+        if (parsed.payload.counterTerroristScore + parsed.payload.terroristScore >= 30) {
+            if ((parsed.payload.counterTerroristScore + parsed.payload.terroristScore) % 3 === 0)
+                first_half = !first_half
         }
     }
 
