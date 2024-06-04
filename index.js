@@ -114,7 +114,7 @@ function roundEnd() {
         .then(response => console.log("round data send"))
 
     //delay 180 sec
-    fetch('https://api.itsport.pro/round', {
+    fetch('https://api2.itsport.pro/round', {
         method: 'POST',
         headers: {
             'Accept': 'application/json',
@@ -180,7 +180,7 @@ function mapEnd() {
     }
 
     delay(5000).then(() => {
-        fetch('https://api.itsport.pro/games', {
+        fetch('https://api2.itsport.pro/games', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
@@ -212,7 +212,7 @@ const receiver = new SrcdsLogReceiver({
 });
 
 receiver.addServers({
-    hostname: 'oberyn.dathost.net',
+    hostname: 'hypnotic.dathost.net',
     //port: 27642,
     password: '123'
 });
