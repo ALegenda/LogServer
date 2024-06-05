@@ -2,305 +2,202 @@ import { SrcdsLogReceiver } from '@srcds/log-receiver';
 import { parse } from '@srcds/log-parser';
 import fetch from "node-fetch";
 
-let stats = {}
+class PlayerStats {
+    constructor(steamId, name) {
+        this.steamId = steamId;
+        this.nickName = name;
+        this.kills = 0;
+        this.assists = 0;
+        this.deaths = 0;
+    }
 
-let map_name = ""
+    recordKill() {
+        this.kills += 1;
+    }
 
-let first_half = true
+    recordAssist() {
+        this.assists += 1;
+    }
 
-let teams = {
-    team1: {
-        name: "",
-        score: 0
-    },
-    team2: {
-        name: "",
-        score: 0
+    recordDeath() {
+        this.deaths += 1;
+    }
+
+    recordSuicide() {
+        this.deaths += 1;
+        this.kills -= 1;
     }
 }
 
-function playerKill(attacker, victim) {
-    if (stats[attacker.steamId]) {
-        stats[attacker.steamId].kills += 1;
-    }
-    else {
-        stats[attacker.steamId] = {
-            "steamId": attacker.steamId,
-            "nickName": attacker.name,
-            "kills": 1,
-            "assists": 0,
-            "deaths": 0,
-        }
-    }
-    if (stats[victim.steamId]) {
-        stats[victim.steamId].deaths += 1;
-    }
-    else {
-        stats[victim.steamId] = {
-            "steamId": victim.steamId,
-            "nickName": victim.name,
-            "kills": 0,
-            "assists": 0,
-            "deaths": 1,
-        }
+class Team {
+    constructor() {
+        this.name = "";
+        this.score = 0;
     }
 
-}
-
-function assistKill(assistant) {
-    if (stats[assistant.steamId]) {
-        stats[assistant.steamId].assists += 1;
-    }
-    else {
-        stats[assistant.steamId] = {
-            "steamId": assistant.steamId,
-            "nickName": assistant.name,
-            "kills": 0,
-            "assists": 1,
-            "deaths": 0,
-        }
+    updateScore(score) {
+        this.score = score;
     }
 }
 
-function suicideKill(player) {
-    if (stats[player.steamId]) {
-        stats[player.steamId].deaths += 1;
-        stats[player.steamId].kills -= 1;
+let stats = {};
+let mapName = "";
+let firstHalf = true;
+let teams = { team1: new Team(), team2: new Team() };
+
+function updatePlayerStats(player, action) {
+    if (!stats[player.steamId]) {
+        stats[player.steamId] = new PlayerStats(player.steamId, player.name);
     }
-    else {
-        stats[player.steamId] = {
-            "steamId": player.steamId,
-            "nickName": player.name,
-            "kills": -1,
-            "assists": 0,
-            "deaths": 1,
-        }
-    }
+    if (action === 'kill') stats[player.steamId].recordKill();
+    if (action === 'assist') stats[player.steamId].recordAssist();
+    if (action === 'death') stats[player.steamId].recordDeath();
+    if (action === 'suicide') stats[player.steamId].recordSuicide();
 }
 
-function roundEnd() {
-
-    let results = Object.keys(stats).map((key) => stats[key]);
-    let results_for_site = results.map(player => {
-        return {
-            "steamId": player.steamId,
-            "nickName": player.nickName,
-            "kills": player.kills,
-            "assists": player.assists,
-            "deaths": player.deaths,
-        }
-    })
-    //write results
-    fetch('https://rcl-testing.onrender.com/test', {
-        method: 'POST',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            "playerStats": results_for_site,
-            "mapName": map_name,
-            "team1": {
-                "name": teams.team1.name,
-                "score": teams.team1.score
-            },
-            "team2": {
-                "name": teams.team2.name,
-                "score": teams.team2.score
-            }
-        })
-    })
-        .then(response => response.json())
-        .then(response => console.log("round data send"))
-
-    //delay 180 sec
-    fetch('https://api2.itsport.pro/round', {
-        method: 'POST',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            "playerStats": results_for_site,
-            "mapName": map_name,
-            "team1": {
-                "name": teams.team1.name,
-                "score": teams.team1.score
-            },
-            "team2": {
-                "name": teams.team2.name,
-                "score": teams.team2.score
-            }
-        })
-    })
-        .then(response => response.json())
-        .then(response => console.log("round data send"))
-
-
+function logEvent(event) {
+    console.log(event);
 }
 
-function mapEnd() {
-    let results = Object.keys(stats).map((key) => stats[key]);
-    let results_for_site = results.map(player => {
-        return {
-            "steamId": player.steamId,
-            "nickName": player.nickName,
-            "kills": player.kills,
-            "assists": player.assists,
-            "deaths": player.deaths,
-        }
-    })
-    fetch('https://rcl-testing.onrender.com/test', {
-        method: 'POST',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            "playerStats": results_for_site,
-            "mapName": map_name,
-            "team1": {
-                "name": teams.team1.name,
-                "score": teams.team1.score
-            },
-            "team2": {
-                "name": teams.team2.name,
-                "score": teams.team2.score
-            }
-        })
-    })
-        .then(response => response.json())
-        .then(response => console.log("round data send"))
-
-
-    let delay = (time) => {
-        return new Promise(resolve => {
-            setTimeout(resolve, time)
-        })
-    }
-
-    delay(5000).then(() => {
-        fetch('https://api2.itsport.pro/games', {
+async function sendData(url, data) {
+    try {
+        const response = await fetch(url, {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                "playerStats": results_for_site,
-                "mapName": map_name,
-                "team1": {
-                    "name": teams.team1.name,
-                    "score": teams.team1.score
-                },
-                "team2": {
-                    "name": teams.team2.name,
-                    "score": teams.team2.score
-                }
-            })
-        })
-            .then(response => response.json())
-            .then(response => console.log("map data send"))
-    })
+            body: JSON.stringify(data)
+        });
+        const result = await response.json();
+        console.log("Data sent:", result);
+    } catch (error) {
+        console.error("Failed to send data:", error);
+    }
+}
+
+async function handleRoundEnd() {
+    const results = Object.values(stats);
+    const resultsForSite = results.map(player => ({
+        steamId: player.steamId,
+        nickName: player.nickName,
+        kills: player.kills,
+        assists: player.assists,
+        deaths: player.deaths
+    }));
+
+    const data = {
+        playerStats: resultsForSite,
+        mapName: mapName,
+        team1: { name: teams.team1.name, score: teams.team1.score },
+        team2: { name: teams.team2.name, score: teams.team2.score }
+    };
+
+    await sendData('https://rcl-testing.onrender.com/test', data);
+    await sendData('https://api2.itsport.pro/round', data);
+}
+
+async function handleMapEnd() {
+    await handleRoundEnd();
+
+    const delay = time => new Promise(resolve => setTimeout(resolve, time));
+    await delay(5000);
+
+    const results = Object.values(stats);
+    const resultsForSite = results.map(player => ({
+        steamId: player.steamId,
+        nickName: player.nickName,
+        kills: player.kills,
+        assists: player.assists,
+        deaths: player.deaths
+    }));
+
+    const data = {
+        playerStats: resultsForSite,
+        mapName: mapName,
+        team1: { name: teams.team1.name, score: teams.team1.score },
+        team2: { name: teams.team2.name, score: teams.team2.score }
+    };
+
+    await sendData('https://api2.itsport.pro/games', data);
 }
 
 const receiver = new SrcdsLogReceiver({
     hostname: '0.0.0.0',
     port: 9872,
-
     onlyRegisteredServers: false
 });
 
 receiver.addServers({
     hostname: 'hypnotic.dathost.net',
-    //port: 27642,
     password: '123'
 });
 
 receiver.on('log', (log) => {
     const parsed = parse(log.payload);
-    //console.log('Log', log);
-    // console.log('Parsed', parsed);
+    if (!parsed) return;
 
-    if (!parsed) return
-
-    if (parsed.type === 'entity_triggered' && parsed.payload.kind === 'match_start') {
-        stats = {}
-        first_half = true
-        map_name = parsed.payload.value
-        console.log(`Match start on map ${map_name}`);
-    }
-
-    if (parsed.type === 'killed') {
-        console.log(`${parsed.payload.attacker.name} kill ${parsed.payload.victim.name}`);
-        playerKill(parsed.payload.attacker, parsed.payload.victim)
-    }
-
-    if (parsed.type === 'suicide') {
-        console.log(`${parsed.payload.player.name} suicide`);
-        suicideKill(parsed.payload.player)
-    }
-
-    if (parsed.type === 'assist') {
-        console.log(`${parsed.payload.assistant.name} assist on kill ${parsed.payload.victim.name}`);
-        assistKill(parsed.payload.assistant)
-    }
-
-    if (parsed.type === 'team_name') {
-        console.log(`Recive team name ${parsed.payload.name}`);
-        if (parsed.payload.team.name === 'COUNTER_TERRORISTS') {
-            teams.team1.name = parsed.payload.name
-        } else {
-            teams.team2.name = parsed.payload.name
-        }
-
-    }
-
-    if (parsed.type === 'team_triggered') {
-        console.log(`Round end with score ${parsed.payload.counterTerroristScore} - ${parsed.payload.terroristScore}`);
-        if (first_half) {
-            teams.team1.score = parsed.payload.counterTerroristScore
-            teams.team2.score = parsed.payload.terroristScore
-        }
-        else {
-            teams.team2.score = parsed.payload.counterTerroristScore
-            teams.team1.score = parsed.payload.terroristScore
-        }
-        if (parsed.payload.counterTerroristScore + parsed.payload.terroristScore === 15) {
-            first_half = false
-        }
-        if (parsed.payload.counterTerroristScore + parsed.payload.terroristScore >= 30) {
-            if ((parsed.payload.counterTerroristScore + parsed.payload.terroristScore) % 3 === 0)
-                first_half = !first_half
-        }
-    }
-
-    if (parsed.type === 'entity_triggered' && parsed.payload.kind === 'round_end') {
-        roundEnd()
-        if (teams.team1.score === 16 && teams.team2.score < 15) {
-            mapEnd()
-        }
-        if (teams.team2.score === 16 && teams.team1.score < 15) {
-            mapEnd()
-        }
-        if (teams.team1.score > 16 && teams.team1.score - 3 > teams.team2.score) {
-            mapEnd()
-        }
-
-        if (teams.team2.score > 16 && teams.team2.score - 3 > teams.team1.score) {
-            mapEnd()
-        }
+    switch (parsed.type) {
+        case 'entity_triggered':
+            if (parsed.payload.kind === 'match_start') {
+                stats = {};
+                firstHalf = true;
+                mapName = parsed.payload.value;
+                logEvent(`Match start on map ${mapName}`);
+            } else if (parsed.payload.kind === 'round_end') {
+                handleRoundEnd();
+                const team1Win = teams.team1.score === 13 && teams.team2.score < 13;
+                const team2Win = teams.team2.score === 13 && teams.team1.score < 13;
+                const team1Lead = teams.team1.score > 13 && teams.team1.score - 3 > teams.team2.score;
+                const team2Lead = teams.team2.score > 13 && teams.team2.score - 3 > teams.team1.score;
+                if (team1Win || team2Win || team1Lead || team2Lead) handleMapEnd();
+            }
+            break;
+        case 'killed':
+            logEvent(`${parsed.payload.attacker.name} killed ${parsed.payload.victim.name}`);
+            updatePlayerStats(parsed.payload.attacker, 'kill');
+            updatePlayerStats(parsed.payload.victim, 'death');
+            break;
+        case 'suicide':
+            logEvent(`${parsed.payload.player.name} committed suicide`);
+            updatePlayerStats(parsed.payload.player, 'suicide');
+            break;
+        case 'assist':
+            logEvent(`${parsed.payload.assistant.name} assisted in killing ${parsed.payload.victim.name}`);
+            updatePlayerStats(parsed.payload.assistant, 'assist');
+            break;
+        case 'team_name':
+            logEvent(`Received team name ${parsed.payload.name}`);
+            if (parsed.payload.team.name === 'COUNTER_TERRORISTS') {
+                teams.team1.name = parsed.payload.name;
+            } else {
+                teams.team2.name = parsed.payload.name;
+            }
+            break;
+        case 'team_triggered':
+            logEvent(`Round end with score ${parsed.payload.counterTerroristScore} - ${parsed.payload.terroristScore}`);
+            if (firstHalf) {
+                teams.team1.score = parsed.payload.counterTerroristScore;
+                teams.team2.score = parsed.payload.terroristScore;
+            } else {
+                teams.team2.score = parsed.payload.counterTerroristScore;
+                teams.team1.score = parsed.payload.terroristScore;
+            }
+            if (parsed.payload.counterTerroristScore + parsed.payload.terroristScore === 12) firstHalf = false;
+            if ((parsed.payload.counterTerroristScore + parsed.payload.terroristScore) >= 24 && (parsed.payload.counterTerroristScore + parsed.payload.terroristScore) % 3 === 0) firstHalf = !firstHalf;
+            break;
+        default:
+            break;
     }
 });
 
 receiver.on('error', (error) => {
-    console.log('error', error);
+    console.error('Receiver error:', error);
 });
 
 async function run() {
     await receiver.listen();
-
     console.log('Server running');
 }
 
-run().catch(console.log);
+run().catch(console.error);
